@@ -1,24 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import SearchBox from "./components/searchBox/searchBox.component";
 import CardList from "./components/cardList/cardList.component";
+import { getData } from "./components/utils/data.utils";
 import "./App.css";
+
+export type Monster = {
+  id: string;
+  name: string;
+  email: string;
+};
 
 const App = () => {
   //Create the get/set and initialize searchField as an empty string
   const [searchField, setSearchField] = useState("");
-  const [monsters, setMonsters] = useState([]);
+  const [monsters, setMonsters] = useState<Monster[]>([]);
   const [filteredMonsters, setFilteredMonsters] = useState(monsters);
 
   //The condition array will be empty since this effect will only be runned one time (first render)
   //// If we wanted to run again based in a variable we passed into the conditional array
   useEffect(() => {
-    return async () => {
-      const response = await fetch(
+    const fetchUsers = async () => {
+      const users = await getData<Monster[]>(
         "https://jsonplaceholder.typicode.com/users"
       );
-      const responseUsers = await response.json();
-      setMonsters(responseUsers);
+      setMonsters(users);
     };
+    fetchUsers();
   }, []);
 
   //The condition array includes the searchField state field since will be re-runned everytime it's changed
@@ -29,7 +36,7 @@ const App = () => {
     setFilteredMonsters(newFilteredMonsters);
   }, [searchField, monsters]);
 
-  const onSearchChange = (event) => {
+  const onSearchChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const searchFieldString = event.target.value.toLowerCase();
     setSearchField(searchFieldString);
   };
